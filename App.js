@@ -6,6 +6,7 @@ import {
   statusCodes,
 } from "@react-native-google-signin/google-signin";
 import { useEffect, useState } from "react";
+import { supabase } from "./utils/superbase";
 
 // npx expo install @react-native-google-signin/google-signin
 // npx expo install expo-dev-client
@@ -13,15 +14,14 @@ import { useEffect, useState } from "react";
 export default function App() {
   const [error, setError] = useState();
   const [userInfo, setUserInfo] = useState();
+  const [idToken,setIdToken]=useState('');
 
   const configureGoogleSignIn = () => {
     GoogleSignin.configure({
       webClientId:
-        "72307864794-vrqf4k859s84o77u52b06l2btc1ap73o.apps.googleusercontent.com",
+        "951418236283-uh1bheqso7sdgame19a1vtjho42sva42.apps.googleusercontent.com",
       androidClientId:
-        "72307864794-v5k7ua1dkhnb3f8s1ccnru8b5gfa70ck.apps.googleusercontent.com",
-      iosClientId:
-        "72307864794-1vuq2apibl4tg6on2f2nmoq5vul3ltvq.apps.googleusercontent.com",
+        "951418236283-jvadas08fqd4sngkjmehss99js145u5o.apps.googleusercontent.com",
     });
   };
 
@@ -36,8 +36,13 @@ export default function App() {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       setUserInfo(userInfo);
+      setIdToken(userInfo.idToken)
+      console.log(userInfo.idToken)
+      const {data,error} = await supabase.auth.signInWithIdToken({'provider':'google','token':userInfo.idToken})
+      console.log(error,data)
       setError();
     } catch (e) {
+      console.log(e)
       setError(e);
     }
   };
@@ -52,6 +57,7 @@ export default function App() {
     <View style={styles.container}>
       <Text>{JSON.stringify(error)}</Text>
       {userInfo && <Text>{JSON.stringify(userInfo.user)}</Text>}
+      {userInfo && <Text>{JSON.stringify(userInfo.idToken)}</Text>}
       {userInfo ? (
         <Button title="Logout" onPress={logout} />
       ) : (
